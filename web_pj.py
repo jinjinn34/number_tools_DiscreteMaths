@@ -21,8 +21,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ====== 시작 안내 페이지 ======
-st.markdown("<h1 style='text-align: center;'>숫자 처리 도구</h1>", unsafe_allow_html=True)
-st.markdown("<h4 style='text-align: center;'>숫자 관련 도구들을 테스트해볼 수 있어요!</h4>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>Number processing Tool</h1>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center;'>You can test tools related to numbers here!</h4>", unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
