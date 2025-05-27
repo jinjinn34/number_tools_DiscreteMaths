@@ -21,13 +21,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ====== 시작 안내 페이지 ======
-st.title("숫자 처리 도구")
+st.markdown("<h1 style='text-align: center;'>숫자 처리 도구</h1>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center;'>숫자 관련 도구들을 테스트해볼 수 있어요!</h4>", unsafe_allow_html=True)
 
-if not st.session_state.started:
-    st.markdown("### 숫자 관련 도구들을 테스트해볼 수 있어요!")
-    if st.button("테스트 시작"):
-        st.session_state.started = True
-    st.stop()
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    if not st.session_state.started:
+        if st.button("테스트 시작", use_container_width=True):
+            st.session_state.started = True
+        st.stop()
 
 # ====== 입력 파싱 함수 ======
 def parse_input(s):
@@ -115,19 +117,21 @@ tabs = st.tabs(["LCG Generator", "ISBN-10", "ISBN-13", "Credit Card"])
 # ====== LCG 탭 ======
 with tabs[0]:
     st.subheader("Linear Congruential Generator")
-    col1, col2 = st.columns(2)
-    with col1:
-        seed = st.text_input("Seed (x₀)")
-        st.markdown('<div class="example-text">e.g. <b>7</b> (valid), <b>two</b> (invalid)</div>', unsafe_allow_html=True)
-        a = st.text_input("Multiplier (a)")
-        st.markdown('<div class="example-text">e.g. <b>5</b> (valid), <b>5.5</b> (invalid)</div>', unsafe_allow_html=True)
-        c = st.text_input("Increment (c)")
-        st.markdown('<div class="example-text">e.g. <b>3</b> (valid), <b>three</b> (invalid)</div>', unsafe_allow_html=True)
-    with col2:
-        m = st.text_input("Modulus (m)")
-        st.markdown('<div class="example-text">e.g. <b>16</b> (valid), <b>-1</b> (invalid)</div>', unsafe_allow_html=True)
-        count = st.text_input("How many numbers?")
-        st.markdown('<div class="example-text">e.g. <b>10</b> (valid), <b>ten</b> (invalid)</div>', unsafe_allow_html=True)
+
+    seed = st.text_input("Seed (x₀)")
+    st.markdown('<div class="example-text">e.g. <b>7</b> (valid), <b>two</b> (invalid)</div>', unsafe_allow_html=True)
+
+    a = st.text_input("Multiplier (a)")
+    st.markdown('<div class="example-text">e.g. <b>5</b> (valid), <b>5.5</b> (invalid)</div>', unsafe_allow_html=True)
+
+    c = st.text_input("Increment (c)")
+    st.markdown('<div class="example-text">e.g. <b>3</b> (valid), <b>three</b> (invalid)</div>', unsafe_allow_html=True)
+
+    m = st.text_input("Modulus (m)")
+    st.markdown('<div class="example-text">e.g. <b>16</b> (valid), <b>-1</b> (invalid)</div>', unsafe_allow_html=True)
+
+    count = st.text_input("How many numbers?")
+    st.markdown('<div class="example-text">e.g. <b>10</b> (valid), <b>ten</b> (invalid)</div>', unsafe_allow_html=True)
 
     if st.button("Generate"):
         try:
