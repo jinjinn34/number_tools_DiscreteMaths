@@ -1,6 +1,10 @@
 import streamlit as st
 import re
 
+# ====== 세션 상태 초기화 ======
+if "started" not in st.session_state:
+    st.session_state.started = False
+
 # ====== 페이지 설정 ======
 st.set_page_config(page_title="Digit Validator & RNG Tool", layout="centered")
 
@@ -16,6 +20,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# ====== 시작 안내 페이지 ======
+st.title("숫자 처리 도구")
+
+if not st.session_state.started:
+    st.markdown("### 숫자 관련 도구들을 테스트해볼 수 있어요!")
+    if st.button("테스트 시작"):
+        st.session_state.started = True
+    st.stop()
+
 # ====== 입력 파싱 함수 ======
 def parse_input(s):
     s = s.strip().replace('^', '**')
@@ -27,7 +40,7 @@ def parse_input(s):
     except:
         raise ValueError("Invalid input format")
 
-# ====== 선형 합동 생성기 (LCG) ======
+# ====== 선형 합동 생성기 ======
 def linear_congruential_generator(seed, a, c, m, count):
     x = seed
     numbers = []
@@ -36,7 +49,7 @@ def linear_congruential_generator(seed, a, c, m, count):
         numbers.append(x)
     return numbers
 
-# ====== ISBN-10 유효성 검사 ======
+# ====== ISBN-10 검사 ======
 def validate_isbn10(isbn):
     isbn = isbn.replace("-", "").upper()
     if len(isbn) != 10:
@@ -55,7 +68,7 @@ def validate_isbn10(isbn):
         return False
     return total % 11 == 0
 
-# ====== ISBN-13 유효성 검사 ======
+# ====== ISBN-13 검사 ======
 def validate_isbn13(isbn):
     isbn = isbn.replace("-", "")
     if len(isbn) != 13 or not isbn.isdigit():
@@ -67,7 +80,7 @@ def validate_isbn13(isbn):
     check_digit = (10 - (total % 10)) % 10
     return check_digit == int(isbn[-1])
 
-# ====== 신용카드 유효성 검사 (Luhn 알고리즘) ======
+# ====== 신용카드 검사 ======
 def validate_credit_card(number):
     number = number.replace(" ", "")
     if len(number) < 12 or len(number) > 19:
@@ -84,8 +97,8 @@ def validate_credit_card(number):
             total += digit
     return total % 10 == 0
 
-# ====== 제목 및 소개 출력 ======
-st.title("Check Digit Validator & RNG Tool")
+# ====== 메인 콘텐츠 ======
+st.title("📁Check Digit Validator & RNG Tool")
 st.markdown("""
 **Topic:** Check Digit Validator + Random Number Generator Tool  
 **Description:**  
