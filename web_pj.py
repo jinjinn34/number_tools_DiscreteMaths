@@ -27,7 +27,7 @@ st.markdown("<h4 style='text-align: center;'>You can test tools related to numbe
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
     if not st.session_state.started:
-        if st.button("테스트 시작", use_container_width=True):
+        if st.button("Test Start - !!", use_container_width=True):
             st.session_state.started = True
         st.stop()
 
