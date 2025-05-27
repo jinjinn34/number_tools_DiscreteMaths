@@ -16,6 +16,17 @@ if not st.session_state.started:
 # 메뉴 선택 (시작한 이후에만 보임)
 menu = st.sidebar.selectbox("기능 선택", ["선형 합동 생성기", "ISBN-10 검증", "ISBN-13 검증", "신용카드 검증"])
 
+#파싱함수수
+def parse_input(s):
+    s = s.strip().replace('^', '**')
+    try:
+        value = eval(s, {"__builtins__": None}, {})
+        if not isinstance(value, int):
+            raise ValueError("Input is not an integer")
+        return value
+    except:
+        raise ValueError("Invalid input format")
+
 # 함수들 정의
 def linear_congruential_generator(seed, a, c, m, count):
     x = seed
@@ -72,19 +83,26 @@ def validate_credit_card(number):
 
 # 메뉴별 동작
 if menu == "선형 합동 생성기":
-    seed = st.number_input("Seed (x₀)", value=1)
-    a = st.number_input("Multiplier (a)", value=1103515245)
-    c = st.number_input("Increment (c)", value=12345)
-    m = st.number_input("Modulus (m)", value=2**31)
-    count = st.number_input("Count", value=10, min_value=1, max_value=1000)
+    seed_input = st.text_input("Seed (x₀)", value="1")
+    a_input = st.text_input("Multiplier (a)", value="1103515245")
+    c_input = st.text_input("Increment (c)", value="12345")
+    m_input = st.text_input("Modulus (m)", value="2^31")
+    count_input = st.text_input("Count", value="10")
 
     if st.button("Generate"):
         try:
+            seed = parse_input(seed_input)
+            a = parse_input(a_input)
+            c = parse_input(c_input)
+            m = parse_input(m_input)
+            count = parse_input(count_input)
+            if count < 1 or count > 1000:
+                raise ValueError("Count는 1 이상 1000 이하여야 합니다.")
             numbers = linear_congruential_generator(seed, a, c, m, count)
             st.write(numbers)
         except Exception as e:
             st.error(f"입력 오류! {e}")
-
+            
 elif menu == "ISBN-10 검증":
     isbn10 = st.text_input("ISBN-10 입력")
     if st.button("검증"):
