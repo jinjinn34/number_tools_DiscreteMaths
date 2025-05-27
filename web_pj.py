@@ -11,7 +11,6 @@ if not st.session_state.started:
     st.markdown("### 숫자 관련 도구들을 테스트해볼 수 있어요!")
     if st.button("테스트 시작"):
         st.session_state.started = True
-        st.experimental_rerun()
     st.stop()  # 아래 코드 실행 안 되게 멈춤
 
 # 메뉴 선택 (시작한 이후에만 보임)
