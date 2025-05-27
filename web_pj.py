@@ -1,22 +1,22 @@
 import streamlit as st
+import re
 
-# 세션 상태 초기화
-if "started" not in st.session_state:
-    st.session_state.started = False
+# ====== 페이지 설정 ======
+st.set_page_config(page_title="Digit Validator & RNG Tool", layout="centered")
 
-st.title("숫자 처리 도구")
+# ====== 스타일 설정 ======
+st.markdown("""
+    <style>
+    .example-text {
+        font-size: 0.8em;
+        color: #555;
+        margin-top: -10px;
+        margin-bottom: 10px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# 아직 시작 안 했으면 시작 안내와 버튼만 보여줌
-if not st.session_state.started:
-    st.markdown("### 숫자 관련 도구들을 테스트해볼 수 있어요!")
-    if st.button("테스트 시작"):
-        st.session_state.started = True
-    st.stop()  # 아래 코드 실행 안 되게 멈춤
-
-# 메뉴 선택 (시작한 이후에만 보임)
-menu = st.sidebar.selectbox("기능 선택", ["선형 합동 생성기", "ISBN-10 검증", "ISBN-13 검증", "신용카드 검증"])
-
-#파싱함수수
+# ====== 입력 파싱 함수 ======
 def parse_input(s):
     s = s.strip().replace('^', '**')
     try:
@@ -27,7 +27,7 @@ def parse_input(s):
     except:
         raise ValueError("Invalid input format")
 
-# 함수들 정의
+# ====== 선형 합동 생성기 (LCG) ======
 def linear_congruential_generator(seed, a, c, m, count):
     x = seed
     numbers = []
@@ -36,6 +36,7 @@ def linear_congruential_generator(seed, a, c, m, count):
         numbers.append(x)
     return numbers
 
+# ====== ISBN-10 유효성 검사 ======
 def validate_isbn10(isbn):
     isbn = isbn.replace("-", "").upper()
     if len(isbn) != 10:
@@ -54,6 +55,7 @@ def validate_isbn10(isbn):
         return False
     return total % 11 == 0
 
+# ====== ISBN-13 유효성 검사 ======
 def validate_isbn13(isbn):
     isbn = isbn.replace("-", "")
     if len(isbn) != 13 or not isbn.isdigit():
@@ -65,6 +67,7 @@ def validate_isbn13(isbn):
     check_digit = (10 - (total % 10)) % 10
     return check_digit == int(isbn[-1])
 
+# ====== 신용카드 유효성 검사 (Luhn 알고리즘) ======
 def validate_credit_card(number):
     number = number.replace(" ", "")
     if len(number) < 12 or len(number) > 19:
@@ -81,48 +84,80 @@ def validate_credit_card(number):
             total += digit
     return total % 10 == 0
 
-# 메뉴별 동작
-if menu == "선형 합동 생성기":
-    seed_input = st.text_input("Seed (x₀)", value="1")
-    a_input = st.text_input("Multiplier (a)", value="1103515245")
-    c_input = st.text_input("Increment (c)", value="12345")
-    m_input = st.text_input("Modulus (m)", value="2^31")
-    count_input = st.text_input("Count", value="10")
+# ====== 제목 및 소개 출력 ======
+st.title("Check Digit Validator & RNG Tool")
+st.markdown("""
+**Topic:** Check Digit Validator + Random Number Generator Tool  
+**Description:**  
+- Validate ISBN-10, ISBN-13, and credit card numbers using correct checksum algorithms.  
+- Generate pseudorandom numbers using a Linear Congruential Generator.  
+- User-friendly web GUI with instant feedback.  
+
+**Team 3 - 이나경, 최현서, 김수아랑, 김혜진, 이현진**
+""")
+
+# ====== 탭 구성 ======
+tabs = st.tabs(["LCG Generator", "ISBN-10", "ISBN-13", "Credit Card"])
+
+# ====== LCG 탭 ======
+with tabs[0]:
+    st.subheader("Linear Congruential Generator")
+    col1, col2 = st.columns(2)
+    with col1:
+        seed = st.text_input("Seed (x₀)")
+        st.markdown('<div class="example-text">e.g. <b>7</b> (valid), <b>two</b> (invalid)</div>', unsafe_allow_html=True)
+        a = st.text_input("Multiplier (a)")
+        st.markdown('<div class="example-text">e.g. <b>5</b> (valid), <b>5.5</b> (invalid)</div>', unsafe_allow_html=True)
+        c = st.text_input("Increment (c)")
+        st.markdown('<div class="example-text">e.g. <b>3</b> (valid), <b>three</b> (invalid)</div>', unsafe_allow_html=True)
+    with col2:
+        m = st.text_input("Modulus (m)")
+        st.markdown('<div class="example-text">e.g. <b>16</b> (valid), <b>-1</b> (invalid)</div>', unsafe_allow_html=True)
+        count = st.text_input("How many numbers?")
+        st.markdown('<div class="example-text">e.g. <b>10</b> (valid), <b>ten</b> (invalid)</div>', unsafe_allow_html=True)
 
     if st.button("Generate"):
         try:
-            seed = parse_input(seed_input)
-            a = parse_input(a_input)
-            c = parse_input(c_input)
-            m = parse_input(m_input)
-            count = parse_input(count_input)
-            if count < 1 or count > 1000:
-                raise ValueError("Count는 1 이상 1000 이하여야 합니다.")
-            numbers = linear_congruential_generator(seed, a, c, m, count)
-            st.write(numbers)
+            seed_val = parse_input(seed)
+            a_val = parse_input(a)
+            c_val = parse_input(c)
+            m_val = parse_input(m)
+            count_val = parse_input(count)
+            result = linear_congruential_generator(seed_val, a_val, c_val, m_val, count_val)
+            st.success("Generated Numbers:")
+            st.code("\n".join(map(str, result)))
         except Exception as e:
-            st.error(f"입력 오류! {e}")
-            
-elif menu == "ISBN-10 검증":
-    isbn10 = st.text_input("ISBN-10 입력")
-    if st.button("검증"):
+            st.error(f"Invalid input: {e}")
+
+# ====== ISBN-10 탭 ======
+with tabs[1]:
+    st.subheader("ISBN-10 Validator")
+    isbn10 = st.text_input("Enter ISBN-10")
+    st.markdown('<div class="example-text">e.g. <b>0306406152</b> (valid), <b>1234567890</b> (invalid)</div>', unsafe_allow_html=True)
+    if st.button("Validate ISBN-10"):
         if validate_isbn10(isbn10):
-            st.success("✅ 유효한 ISBN-10입니다!")
+            st.success("✅ Valid ISBN-10")
         else:
-            st.error("❌ 유효하지 않은 ISBN-10입니다!")
+            st.error("❌ Invalid ISBN-10")
 
-elif menu == "ISBN-13 검증":
-    isbn13 = st.text_input("ISBN-13 입력")
-    if st.button("검증"):
+# ====== ISBN-13 탭 ======
+with tabs[2]:
+    st.subheader("ISBN-13 Validator")
+    isbn13 = st.text_input("Enter ISBN-13")
+    st.markdown('<div class="example-text">e.g. <b>9780306406157</b> (valid), <b>9781234567890</b> (invalid)</div>', unsafe_allow_html=True)
+    if st.button("Validate ISBN-13"):
         if validate_isbn13(isbn13):
-            st.success("✅ 유효한 ISBN-13입니다!")
+            st.success("✅ Valid ISBN-13")
         else:
-            st.error("❌ 유효하지 않은 ISBN-13입니다!")
+            st.error("❌ Invalid ISBN-13")
 
-elif menu == "신용카드 검증":
-    card = st.text_input("신용카드 번호 입력")
-    if st.button("검증"):
+# ====== 신용카드 탭 ======
+with tabs[3]:
+    st.subheader("Credit Card Validator")
+    card = st.text_input("Enter credit card number")
+    st.markdown('<div class="example-text">e.g. <b>4539 1488 0343 6467</b> (valid), <b>1234 5678 9012 3456</b> (invalid)</div>', unsafe_allow_html=True)
+    if st.button("Validate Credit Card"):
         if validate_credit_card(card):
-            st.success("✅ 유효한 신용카드 번호입니다!")
+            st.success("✅ Valid credit card number")
         else:
-            st.error("❌ 유효하지 않은 신용카드 번호입니다!")
+            st.error("❌ Invalid credit card number")
