@@ -1,16 +1,24 @@
 import streamlit as st
 
-def parse_input(s):
-    s = s.strip().replace('^', '**')
-    try:
-        value = eval(s, {"__builtins__":None}, {})
-        if not isinstance(value, int):
-            raise ValueError("Input is not an integer")
-        return value
-    except:
-        raise ValueError("Invalid input format")
+# 세션 상태 초기화
+if "started" not in st.session_state:
+    st.session_state.started = False
 
-def linear_congruential_generator(seed, a, c, m, count): #LCG 선형 합동 생성기 함수수
+st.title("숫자 처리 도구")
+
+# 아직 시작 안 했으면 시작 안내와 버튼만 보여줌
+if not st.session_state.started:
+    st.markdown("### 숫자 관련 도구들을 테스트해볼 수 있어요!")
+    if st.button("테스트 시작"):
+        st.session_state.started = True
+        st.experimental_rerun()
+    st.stop()  # 아래 코드 실행 안 되게 멈춤
+
+# 메뉴 선택 (시작한 이후에만 보임)
+menu = st.sidebar.selectbox("기능 선택", ["선형 합동 생성기", "ISBN-10 검증", "ISBN-13 검증", "신용카드 검증"])
+
+# 함수들 정의
+def linear_congruential_generator(seed, a, c, m, count):
     x = seed
     numbers = []
     for _ in range(count):
@@ -18,7 +26,7 @@ def linear_congruential_generator(seed, a, c, m, count): #LCG 선형 합동 생�
         numbers.append(x)
     return numbers
 
-def validate_isbn10(isbn): #ISBN-10 검증기기
+def validate_isbn10(isbn):
     isbn = isbn.replace("-", "").upper()
     if len(isbn) != 10:
         return False
@@ -36,7 +44,7 @@ def validate_isbn10(isbn): #ISBN-10 검증기기
         return False
     return total % 11 == 0
 
-def validate_isbn13(isbn): #ISBN-13 검증기기
+def validate_isbn13(isbn):
     isbn = isbn.replace("-", "")
     if len(isbn) != 13 or not isbn.isdigit():
         return False
@@ -47,7 +55,7 @@ def validate_isbn13(isbn): #ISBN-13 검증기기
     check_digit = (10 - (total % 10)) % 10
     return check_digit == int(isbn[-1])
 
-def validate_credit_card(number): #신용카드 버노 검증기기
+def validate_credit_card(number):
     number = number.replace(" ", "")
     if len(number) < 12 or len(number) > 19:
         return False
@@ -63,12 +71,8 @@ def validate_credit_card(number): #신용카드 버노 검증기기
             total += digit
     return total % 10 == 0
 
-st.title("Check Digit Validator + Linear Congruential Generator Tool")
-
-menu = st.sidebar.selectbox("기능 선택", ["선형 합동 생성기", "ISBN-10 검증", "ISBN-13 검증", "신용카드 검증"])
-
+# 메뉴별 동작
 if menu == "선형 합동 생성기":
-    
     seed = st.number_input("Seed (x₀)", value=1)
     a = st.number_input("Multiplier (a)", value=1103515245)
     c = st.number_input("Increment (c)", value=12345)
